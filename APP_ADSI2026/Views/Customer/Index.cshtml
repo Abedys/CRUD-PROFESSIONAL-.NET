@@ -1,0 +1,381 @@
+﻿@model IEnumerable<MVC.Data.Models.Customer>
+
+
+@{
+}
+
+<!--Esto es un modal -->
+<div class="row">
+    <div class="col-md-8">
+        <h1>listado de  Clientes</h1>
+    </div>
+    <div class=" col-md-4  text-end">
+        <button type="button" class="btn btn-primary" onclick="openModal(false)" > <!--con este onclick que es false, le dicimos que mientras no sea editar ejecute el modal normal -->
+            <!--Esto es un icono -->
+            <i class="fa-solid fa-circle-plus"></i>
+            Crear Cliente
+        </button>
+    </div>
+</div>
+
+
+<!--Esto es un datatable -->
+<div class="row">
+    <div class="col-md-12">
+        <table class="table" id="tbcustomer">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Id</th>
+                    <th>Pais</th>
+                    <th>Empresa</th>
+                    <th>Responsable</th>
+                    <th>telefono</th>
+                    <th>Acciones</th>
+
+                </tr>
+            </thead>
+            <tbody>
+               
+
+            </tbody>
+            
+        </table>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="modal fade" id="modalCustomer" tabindex="-1" data-bs-backdrop="static" data-bs-Keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titleModal">Crear Cliente</h5>
+                <button type="button" class="btn-close" onclick="clearFormCustomer()"></button>
+            </div>
+            <div class="modal-body">
+
+
+                <!--Esto es la etiqueta para crear un formulario -->
+                <form>
+                    <section class="row">
+                        <div class="col-md-2">
+                            <label class="col-form-label">id Customer</label>
+                            <input type="text" class="form-control" id="txtId" placeholder="Digita el Id" />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="col-form-label">Pais</label>
+                            <input type="text" class="form-control" id="txtCountry" placeholder="Digita el pais" />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="col-form-label">Empresa</label>
+                            <input type="text" class="form-control" id="txtCompany" placeholder="Digita la Empresa" />
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="col-md-6">
+                            <label class="col-form-label">Respnsable</label>
+                            <input type="text" class="form-control" id="txtContacName" placeholder="Digita el Responsable" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="col-form-label">Telefono</label>
+                            <input type="text" class="form-control" id="txtPhone" placeholder="Digita el Telefono" />
+                        </div>
+                    </section>
+                </form>
+
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" onclick="clearFormCustomer()">Cerrar</button>
+                <button id="btnModalSave" type="button" class="btn btn-outline-success" onclick="onSaveCustomer()">Crear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        //variable global de idcustomer
+        var isEdit = false;
+        //esta lista es para obtener la infromacion del customer que estoy consultando
+        var listCustomer=[];
+
+
+        $(document).ready(function () {
+            console.log("Hola clase")
+            getAllCustomer();
+
+        });
+
+        // Función para traer la información
+        function getAllCustomer() {
+            $.ajax({
+                url: '@Url.Action("GetAllCustomers", "Customer")', // cambia esta ruta por la real
+                method: 'GET', //aqui le indicamos el metodo http que vamos  a usar
+                dataType:'json', //aqui le decimos el tipo de dato que queremos enviar o traer casi simepr ees json
+                success: function (result) {
+                    listCustomer=result;
+                    console.log(listCustomer)
+                    //aqui le estoy diciendo que pase la informacion a la tabla
+                    loadTable(listCustomer);
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        // Configuración del DataTable: función para mostrar la información
+        function loadTable(data) {
+            $('#tbcustomer').DataTable({
+                data: data,
+                // destruye la tabla anterior y la vuelve a cargar
+                destroy: true,
+                // permite que la tabla se adapte al tamaño de la pantalla
+                responsive: true, //esta linea hace que la tabla sea responsive y se adapta a todo tipo de pantallas
+
+                columns: [
+                    { data: 'customerId' },
+                    { data: 'country' },
+                    { data: 'companyName' },
+                    { data: 'contactName' },
+                    { data: 'phone' },
+                    {
+                    // Columna de acciones:
+                    // Se genera una columna especial dentro de la tabla que añade botones de
+                    // "Editar" y "Eliminar" para cada cliente mostrado.
+                    // Estos botones se crean dinámicamente tomando el id del cliente de la fila actual,
+                    // de modo que cada registro tenga sus propias acciones asociadas.
+                    // Esto permite gestionar la información directamente desde la tabla sin necesidad
+                    // de escribir los botones manualmente en el HTML.
+                        data: null,
+                        render:function(data)
+                        {
+                            //Codigo para colocar los botones de editar y eliminar
+                            const id=data.customerId;
+                            return `
+                                     <button  class="btn btn-warning" onclick = "editCustomer('`+ id + `')" >
+                                     <i class="fas fa-edit" > </i> Editar
+                                     </button >
+                                     <button class="btn btn-danger" onclick = "deleteCustomer('`+ id + `')" > 
+                                     <i class="far fa-trash-alt" > </i> Eliminar
+                                     </button >
+
+                                   `
+                        }
+                    }
+                ]
+            });
+        }
+
+        //Esta uncion se utiliza para decirle al navegador que vamos a eliminar un registro
+        function deleteCustomer(customerId){
+            alertDelete().then((result)=>{
+                if(result.isConfirmed)
+                {
+                    //aqui estamos llamando la funcion de confirmacion para realizar los cambios en la base de datos
+                    confirmDeleteCustomer(customerId)
+                    console.log('se elimino', customerId )
+                }else
+                {
+                    console.log('No eliminar', customerId )
+                }
+            });
+
+        }
+        //con esta funcion confrimamos la eliminacion enviamos la peticion a la base de datos y guardamos los cambios
+        function confirmDeleteCustomer(id) {
+            $.ajax({
+                url: '@Url.Action("DeleteCustomer", "Customer")', // cambia esta ruta por la real
+                method: 'DELETE',
+                //data son los parametros que vamos a enviar
+                data:{
+                    'customerId' : id
+                },
+                DataTable: 'json',
+                success: function(result){
+                    console.log(result);
+                    toastMessage('sucess', 'Registro eliminado exitosamente')
+                    getAllCustomer();
+
+                },
+                error: function (error) {
+                    console.error(error);
+                    alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                }
+            });
+        }
+
+        //funcion para abrir y editar el modal en base al button de ediar registro
+        function openModal(isEdit){
+            if(isEdit) //con este if  le dicimos que mientras sea editar ejecute el modal con los cambios a editar
+            {
+                $('#titleModal').html('Editar Cliente') //esta linea de codigo modifica el htm desde js
+                $('#btnModalSave').html('Editar') //esta linea de codigo edita un boton ddel html y lo cambia por editar
+            }
+            else
+            {
+                $('#titleModal').html('Crear Cliente') //esta linea de codigo modifica el htm desde js busco un id y cambia lo que hay en el id por lo que le digamos
+                $('#btnModalSave').html('Crear') //esta linea de codigo edita un boton del html y lo cambia por crear
+            }
+             $('#modalCustomer').modal('show');
+        }
+
+        //funcion para eliminar el formulario
+        function clearFormCustomer(){
+             $('#txtId').val(''); 
+             $('#txtCountry').val('');
+             $('#txtCompany').val('');
+             $('#txtContacName').val('');
+             $('#txtPhone').val('');
+             $('#modalCustomer').modal('hide'); //esta linea de codigo cierra el modal con hide
+             isEdit = false;
+             $('#txtId').attr('disabled', false);//cuando es false se hablita cuando es true se ihnabilita
+        }
+
+        //capturar la informacion
+        function onSaveCustomer(){
+            if(validateForm())
+            {
+                const idCustomer = $('#txtId').val(); //val() se usa para decirle que los capture
+                const country = $('#txtCountry').val();
+                const company = $('#txtCompany').val();
+                const contacName = $('#txtContacName').val();
+                const phone = $('#txtPhone').val();
+
+                const customer = {
+                    'CustomerId': idCustomer,
+                    'Country': country,
+                    'ContacName': contacName,
+                    'CompanyName': company,
+                    'Phone': phone,
+                };
+
+                if(isEdit == false)
+                {
+                    addCustomer(customer);
+                }
+                else
+                {
+                    confirmEditCustomer(customer);
+                }
+                
+            }
+        }
+
+            
+        //Funcion para poner campos obligatorios
+        function validateForm(){
+            if($('#txtId').val() == ''){
+                $('#txtId').focus()
+                toastMessage("warning",'El IdCustomer es obligatorio')
+                return false;
+            }
+
+             if($('#txtCountry').val() == ''){
+                $('#txtCountry').focus()
+                toastMessage("warning",'El Pais es obligatorio')
+                return false;
+            }
+
+             if($('#txtCompany').val() == ''){
+                $('#txtCompany').focus()
+                toastMessage("warning",'La Empresa es obligatoria')
+                return false;
+            }
+
+             if($('#txtContacName').val() == ''){
+                $('#txtContacName').focus()
+                toastMessage("warning",'El Responsable es obligatorio')
+                return false;
+            }
+
+             if($('#txtPhone').val() == ''){
+                $('#txtPhone').focus()
+                toastMessage("warning",'El Telofono es obligatorio')
+                return false;
+            }
+
+
+            return true;
+        }
+
+        //funcion para enviar los datos y agregarlos
+        function addCustomer(customer){
+            console.log(customer);
+             $.ajax({
+                url: '@Url.Action("AddCustomer", "Customer")', // cambia esta ruta por la real
+                method: 'POST',
+                //data son los parametros que vamos a enviar
+                data:customer,
+                DataTable: 'json',
+                success: function(result){
+                    console.log(result);
+                    toastMessage('sucess', 'Registro creado exitosamente')
+                    clearFormCustomer();
+                    getAllCustomer();
+
+                },
+                error: function (error) {
+                    console.error(error);
+                    alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                }
+            });
+        }
+
+        //funcion para mostrar la informacion del registro a editar
+        function editCustomer(id){
+            isEdit = true;
+            //idCustomer = id;
+            //find se usa para filtrar
+            const customer = listCustomer.find(x=> x.customerId == id);
+            $('#txtId').val(customer.customerId); //val() se usa para decirle que los capture
+            $('#txtId').attr('disabled', true); // es un atributo que sirve para ihnabilitar un campo en el html
+            $('#txtCountry').val(customer.country);
+            $('#txtCompany').val(customer.companyName);
+            $('#txtContacName').val(customer.contactName);
+            $('#txtPhone').val(customer.phone);
+            
+            openModal(true);
+            console.log(idCustomer);
+
+            console.log(customer);
+        }
+
+        //funcion para enviar la informacion actualizada
+         function confirmEditCustomer(customer){
+             console.log(customer);
+             $.ajax({
+                url: '@Url.Action("UpdateCustomer", "Customer")', // cambia esta ruta por la real
+                method: 'PUT',
+                //data son los parametros que vamos a enviar
+                data:customer,
+                DataTable: 'json',
+                success: function(result){
+                    console.log(result);
+                    toastMessage('sucess', 'Registro Editado exitosamente')
+                    clearFormCustomer();
+                    getAllCustomer();
+
+                },
+                error: function (error) {
+                    console.error(error);
+                    alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                }
+            });
+        }
+
+
+
+    </script>
+}
+
+
