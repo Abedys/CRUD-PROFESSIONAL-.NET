@@ -139,6 +139,19 @@
 
         }
 
+        function errorHttp(error){
+            if (error.status == 400 || 401){
+            
+                alertWarning(error.responseJSON.message)
+            }else 
+            {
+                alertError(error.responseJSON.message)
+               
+            }
+            console.error(error);
+
+        }
+
     </script>
 
 </body>

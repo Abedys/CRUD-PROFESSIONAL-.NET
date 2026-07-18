@@ -4,9 +4,13 @@ using MVC.Domain.servicios.interfaces;
 using MVC.Data.DTO.Customer;
 using MVC.Data.Models;
 using MVC.Data.DataContext;
+using APP_ADSI2026.Handlers;
+using MVC.common;
+using MVC.Common.Exceptions;
 
 namespace APP_ADSI2026.Controllers
 {
+    [TypeFilter(typeof(CustomExceptionHandler))]
     public class CustomerController : Controller
     {
 
@@ -67,6 +71,8 @@ namespace APP_ADSI2026.Controllers
         [HttpPut("UpdateCustomer")]
         public async Task<IActionResult> UpdateCustomer(UpdateCustomerDtocs update)
         {
+            
+
             bool succes = await _customerServices.updateCustomerAsync(update);
             return Ok(succes);
         }

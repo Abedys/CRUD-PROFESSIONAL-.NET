@@ -128,7 +128,8 @@
                     loadTable(listCustomer);
                 },
                 error: function (error) {
-                    console.error(error);
+                    errorHttp(error);
+                    //console.error(error);
                 }
             });
         }
@@ -208,8 +209,9 @@
 
                 },
                 error: function (error) {
-                    console.error(error);
-                    alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                    errorHttp(error);
+                    //console.error(error);
+                    //alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
                 }
             });
         }
@@ -325,8 +327,9 @@
 
                 },
                 error: function (error) {
-                    console.error(error);
-                    alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                    errorHttp(error);
+                    //console.error(error);
+                    //alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
                 }
             });
         }
@@ -345,7 +348,7 @@
             $('#txtPhone').val(customer.phone);
             
             openModal(true);
-            console.log(idCustomer);
+            //console.log(idCustomer);
 
             console.log(customer);
         }
@@ -367,8 +370,10 @@
 
                 },
                 error: function (error) {
-                    console.error(error);
-                    alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                    errorHttp(error);
+                   // console.error(error);
+                    //alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+
                 }
             });
         }
