@@ -43,6 +43,15 @@
             </div>
         </nav>
     </header>
+
+    <div id="overlay" class="overlay">
+        <div class="loader">
+            <img src="/img/Cube-loading.gif" alt="loading..." id="loadingimg" />
+            <p>Cargando...</p>
+        </div>
+
+    </div>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -151,6 +160,14 @@
             console.error(error);
 
         }
+        //mostrar el leader durante las solicitudes AJAX
+        $(document).ajaxStart(function(){
+            $("#overlay").css("display", "flex");
+        });
+
+        $(document).ajaxStop(function () {
+            $("#overlay").css("display", "none");
+        });
 
     </script>
 
