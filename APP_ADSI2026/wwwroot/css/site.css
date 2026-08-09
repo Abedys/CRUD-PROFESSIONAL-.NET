@@ -49,3 +49,104 @@ body {
     font-size: 30px;
     color: white;
 }
+
+/* =========================================================
+   ESTILOS DE LOS LOGOS DE LOS CONTROLADORES
+   ========================================================= */
+  
+/* Estilos principales de cada elemento del menú */
+.nav-menu-item {
+    /* Permite organizar el icono y el texto en una fila */
+    display: flex;
+    /* Centra verticalmente el icono y el texto */
+    align-items: center;
+    /* Espacio entre el icono y el texto */
+    gap: 8px;
+    /* Espacio interno del elemento */
+    padding: 10px 14px !important;
+    /* Espacio externo entre elementos del menú */
+    margin: 0 3px;
+    /* Esquinas redondeadas */
+    border-radius: 8px;
+    /* Color del texto */
+    color: #475569 !important;
+    /* Hace suave la transición cuando cambia el estilo */
+    transition: all 0.2s ease;
+}
+
+/* Estilo de los iconos dentro del menú */
+    .nav-menu-item i {
+        /* tamaño que tendra el icono*/
+        font-size: 1.05rem;
+    }
+
+/* Estilo cuando pasamos el mouse por encima */
+.nav-menu-item:hover {
+    /* Cambia el color del fondo */
+    background-color: #f1f5f9;
+    /* Cambia el texto a azul */
+    color: #2563eb !important;
+}
+
+/* Cambia el icono a azul cuando pasamos el mouse */
+.nav-menu-item:hover i {
+    color: #2563eb;
+}
+
+
+
+/* Logo y nombre de la aplicación */
+.app-logo {
+    /* Organiza el icono y el texto horizontalmente */
+    display: flex;
+    /* Centra verticalmente el icono y el texto */
+    align-items: center;
+    /* Espacio entre el icono y el nombre */
+    gap: 9px;
+    /* Hace el texto un poco más grueso */
+    font-weight: 600;
+    /* Color azul del logo */
+    color: #2563eb !important;
+}
+
+/* Icono del logo */
+.app-logo i {
+    /* Aumenta el tamaño del icono */
+    font-size: 1.5rem;
+}
+
+/* =========================================================
+   ESTILOS DEL LOGO DE LA APLICACIÓN
+   ========================================================= */
+
+/* Estilo del elemento del menú cuando está activo/seleccionado */
+.nav-menu-item.active {
+    /* Color de fondo azul muy claro */
+    background-color: #eff6ff;
+    /* Color azul del texto */
+    color: #2563eb !important;
+    /* Hace que el texto sea un poco más grueso */
+    font-weight: 600;
+}
+
+
+/* Estilo del icono cuando el elemento del menú está activo */
+.nav-menu-item.active i {
+    /* Cambia el icono a color azul */
+    color: #2563eb;
+}
+
+/* =========================================================
+   BOTONES DE ACCIONES DE LA TABLA
+   ========================================================= */
+
+.btn-action {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}

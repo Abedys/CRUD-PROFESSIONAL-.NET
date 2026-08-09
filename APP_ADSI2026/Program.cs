@@ -25,6 +25,7 @@ namespace APP_ADSI2026
             #region Inyectores de dependencia
             builder.Services.AddScoped<ICustomerServices, CustomerServices>(); 
             builder.Services.AddScoped<ISupplierServices, SupplierServices>();
+            builder.Services.AddScoped<IProductServices, ProductServices>();
             #endregion
 
             var app = builder.Build();

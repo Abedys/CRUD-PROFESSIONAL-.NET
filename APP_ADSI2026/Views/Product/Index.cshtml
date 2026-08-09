@@ -1,0 +1,525 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    
+<!--Esto es un modal -->
+<div class="row">
+    <div class="col-md-8">
+        <h1>listado de  Productos</h1>
+    </div>
+    <div class=" col-md-4  text-end">
+        <button type="button" class="btn btn-primary" onclick="openModal(false)" > <!--con este onclick que es false, le dicimos que mientras no sea editar ejecute el modal normal -->
+            <!--Esto es un icono -->
+            <i class="fa-solid fa-circle-plus"></i>
+            Crear Producto
+        </button>
+    </div>
+</div>
+
+
+<!--Esto es un datatable -->
+<div class="row">
+    <div class="col-md-12">
+        <table class="table" id="tbproduct">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Provedor</th>
+                    <th>Categoria</th>
+
+                </tr>
+            </thead>
+            <tbody>
+               
+
+            </tbody>
+            
+        </table>
+
+    </div>
+
+</div>
+
+
+
+
+<div class="modal fade" id="modalProduct" tabindex="-1" data-bs-backdrop="static" data-bs-Keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="IdTitleProduct">Crear Producto</h5>
+                <button type="button" class="btn-close" onclick="clearFormProduct()"></button>
+            </div>
+            <div class="modal-body">
+
+
+                <!--Esto es la etiqueta para crear un formulario -->
+                <form>
+                    <section class="row">
+                        <div class="col-md-4">
+                            <label class="col-form-label">Producto</label>
+                            <input type="text" class="form-control" id="txtProduct" placeholder="Digita el Nombre del producto" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">Precio</label>
+                            <input type="text" class="form-control" id="txtPrecio" placeholder="Digita el precio" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="col-form-label">Cantidad</label>
+                            <input type="text" class="form-control" id="txtCantidad" placeholder="Digita la Cantidad" />
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="col-md-6">
+                            <label class="col-form-label">Categorias</label>
+                            
+                            <select id="cmbCategories" class="form-control" onchange="changeCmbCategories()">
+                                <option disabled selected>Seleccionar</option>
+                            </select>
+
+                        </div>
+                        <div class="col-md-6">
+                            <label class="col-form-label">Provedor</label>
+                            
+                            <select id="cmbSupplier" class="form-control" onchange="changeCmbSupplier()">
+                                <option disabled selected>Seleccionar</option>
+                            </select>
+
+                        </div>
+                    </section>
+                </form>
+
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" onclick="clearFormProduct()">Cerrar</button>
+                <button id="btnModalSave" type="button" class="btn btn-outline-success" onclick="onSaveProduct()">Crear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        //variable global de idcustomer
+        var isEdit = false;
+        //esta lista es para obtener la infromacion del customer que estoy consultando
+        //var listCustomer=[];
+        var listProduct = [];
+        var listCategories = [];
+        var idCategory = 0;
+        var idSupplier = 0;
+        var idProduct = 0;
+        var listSupplier =[];
+
+
+        $(document).ready(function () {
+            console.log("Hola clase")
+            //getAllCustomer();
+            getAllCategories();
+            getAllSupplier();
+            getAllProduct();
+        });
+
+         // Función para traer la información
+        function getAllCategories() {
+            $.ajax({
+                    url: '@Url.Action("GetAllCategories", "Categories")', // cambia esta ruta por la real
+                method: 'GET', //aqui le indicamos el metodo http que vamos  a usar
+                dataType:'json', //aqui le decimos el tipo de dato que queremos enviar o traer casi simepr ees json
+                success: function (result) {
+
+
+                    console.log(result)
+                    listCategories=result
+                    LoadCmbCategories(result)
+                        
+                },
+                error: function (error) {
+
+                    console.error(error);
+                }
+            });
+        }
+
+        function LoadCmbCategories(data, selected){
+            $("#cmbCategories").empty();
+            $("#cmbCategories").append('<option value="" disabled selected>Seleccione una categoria</option>')
+            $.each(data, function(i, lista){
+                if(data[i].categoryId == selected){
+
+                    $("#cmbCategories").append('<option value="' + data[i].categoryId + '"selected>' + data[i].categoryName + '</option>');
+                }
+                else{
+
+                    $("#cmbCategories").append('<option value="' + data[i].categoryId + '">' + data[i].categoryName + '</option>');
+                }
+            });
+        }
+
+        function changeCmbCategories(){
+            const cmb = document.getElementById("cmbCategories");
+            idCategory = cmb.options[cmb.selectedIndex].value;
+            console.log('valor ah cambiado:', idCategory);
+            
+        }
+
+
+
+            // Función para traer la información
+        function getAllSupplier() {
+            $.ajax({
+                url: '@Url.Action("GetAllSupplier", "Supplier")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                    listSupplier=result
+                    LoadCmbSupplier(listSupplier);
+                },  // <- faltaba esto
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        //funcion para utilizar los registros y ponerlos en el combobox
+        function LoadCmbSupplier(data, selected){
+            $("#cmbSupplier").empty();
+            $("#cmbSupplier").append('<option value="" disabled selected>Seleccione un proveedor </option>')
+            $.each(data, function(i, lista){
+                if(data[i].supplierId == selected){
+
+                        $("#cmbSupplier").append('<option value="' + data[i].supplierId + '"selected>' + data[i].companyName + '</option>');
+                }
+                else{
+
+                        $("#cmbSupplier").append('<option value="' + data[i].supplierId + '">' + data[i].companyName + '</option>');
+                }
+            });
+        }
+        //funcion para selecionar un comobox con id
+         function changeCmbSupplier(){
+            const cmb = document.getElementById("cmbSupplier");
+            idSupplier = cmb.options[cmb.selectedIndex].value;
+            console.log('valor ah cambiado:', idSupplier);
+            
+        }
+
+        // Función para traer la información
+        function getAllProduct() {
+            $.ajax({
+                url: '@Url.Action("GetAllProduct", "Product")', // cambia esta ruta por la real
+                method: 'GET', //aqui le indicamos el metodo http que vamos  a usar
+                dataType:'json', //aqui le decimos el tipo de dato que queremos enviar o traer casi simepr ees json
+                success: function (result) {
+
+                    listProduct = result;
+                    console.log(listProduct)
+                    //aqui le estoy diciendo que pase la informacion a la tabla
+                    loadTable(listProduct);
+                },
+                error: function (error) {
+                    //console.error(error);
+                }
+            });
+        }
+
+        // Configuración del DataTable: función para mostrar la información
+        function loadTable(data) {
+            $('#tbproduct').DataTable({
+                data: data,
+                // destruye la tabla anterior y la vuelve a cargar
+                destroy: true,
+                // permite que la tabla se adapte al tamaño de la pantalla
+                responsive: true, //esta linea hace que la tabla sea responsive y se adapta a todo tipo de pantallas
+
+                columns: [
+                    { data: 'productName' },
+                    { data: 'unitPrice' },
+                    { data: 'unitsInStock' },
+                    { data: 'supplier' },
+                    { data: 'category' },
+                    {
+                    // Columna de acciones:
+                    // Se genera una columna especial dentro de la tabla que añade botones de
+                    // "Editar" y "Eliminar" para cada cliente mostrado.
+                    // Estos botones se crean dinámicamente tomando el id del cliente de la fila actual,
+                    // de modo que cada registro tenga sus propias acciones asociadas.
+                    // Esto permite gestionar la información directamente desde la tabla sin necesidad
+                    // de escribir los botones manualmente en el HTML.
+                        data: null,
+                        render:function(data)
+                        {
+                            //Codigo para colocar los botones de editar y eliminar
+                            const id=data.productId;
+                            return `
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="editProduct('${id}')"
+                                        title="Editar producto">
+
+                                        <i class="bi bi-pencil"></i>
+
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteProduct('${id}')"
+                                        title="Eliminar producto">
+
+                                        <i class="bi bi-trash"></i>
+
+                                    </button>
+
+                                </div>
+                            `;
+                            
+                        }
+                    }
+                ]
+            });
+        }
+
+        //Esta uncion se utiliza para decirle al navegador que vamos a eliminar un registro
+        function deleteProduct(productId){
+            alertDelete().then((result)=>{
+                if(result.isConfirmed)
+                {
+                    //aqui estamos llamando la funcion de confirmacion para realizar los cambios en la base de datos
+                    confirmDeleteProduct(productId)
+                    console.log('se elimino', productId )
+                }else
+                {
+                    console.log('No eliminar', productId )
+                }
+            });
+
+        }
+        //con esta funcion confrimamos la eliminacion enviamos la peticion a la base de datos y guardamos los cambios
+        function confirmDeleteProduct(id) {
+            $.ajax({
+                url: '@Url.Action("DeleteProduct", "Product")', // cambia esta ruta por la real
+                method: 'DELETE',
+                //data son los parametros que vamos a enviar
+                data:{
+                    'productId' : id
+                },
+                DataTable: 'json',
+                success: function(result){
+                    console.log(result);
+                    toastMessage('sucess', 'Registro eliminado exitosamente')
+                    getAllProduct();
+
+                },
+                error: function (error) {
+                    errorHttp(error);
+                    //console.error(error);
+                    //alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                }
+            });
+        }
+
+        //funcion para abrir y editar el modal en base al button de ediar registro
+        function openModal(isEdit){
+            if(isEdit) //con este if  le dicimos que mientras sea editar ejecute el modal con los cambios a editar
+            {
+                $('#IdTitleProduct').html('Editar Producto') //esta linea de codigo modifica el htm desde js
+                $('#btnModalSave').html('Editar') //esta linea de codigo edita un boton ddel html y lo cambia por editar
+            }
+            else
+            {
+                $('#IdTitleProduct').html('Crear Producto') //esta linea de codigo modifica el htm desde js busco un id y cambia lo que hay en el id por lo que le digamos
+                $('#btnModalSave').html('Crear') //esta linea de codigo edita un boton del html y lo cambia por crear
+            }
+             $('#modalProduct').modal('show');
+        }
+
+        //funcion para eliminar el formulario
+        function clearFormProduct(){
+             $('#txtProduct').val(''); 
+             $('#txtPrecio').val('');
+             $('#txtCantidad').val('');
+             $('#cmbCategories').val('');
+             $('#cmbSupplier').val('');
+             $('#modalProduct').modal('hide'); //esta linea de codigo cierra el modal con hide
+             isEdit = false;
+             $('#txtProduct').attr('disabled', false);//cuando es false se hablita cuando es true se ihnabilita
+        }
+
+        //capturar la informacion
+        function onSaveProduct(){
+            if(validateForm())
+            {
+                const nombre = $('#txtProduct').val(); //val() se usa para decirle que los capture
+                const precio = $('#txtPrecio').val();
+                const cantidad = $('#txtCantidad').val();
+                const provedor = $('#cmbSupplier').val();
+                const categoria = $('#cmbCategories').val();
+
+                const producto = {
+
+                    'ProductId' : idProduct,
+                    'ProductName': nombre,
+                    'UnitPrice': precio,
+                    'UnitsInStock': cantidad,
+                    'SupplierId': provedor,
+                    'CategoryId': categoria,
+                };
+
+                if(isEdit == false)
+                {
+                    AddProduct(producto);
+                }
+                else
+                {
+
+                    confirmeditProduct(producto);
+                }
+                
+            }
+        }
+
+            
+        //Funcion para poner campos obligatorios
+        function validateForm(){
+            if($('#txtProduct').val() == ''){
+                $('#txtProduct').focus()
+                toastMessage("warning",'El nombre del producto es obligatorio')
+                return false;
+            }
+
+             if($('#txtPrecio').val() == ''){
+                $('#txtPrecio').focus()
+                toastMessage("warning",'El Precio es obligatorio')
+                return false;
+            }
+
+             if($('#txtCantidad').val() == ''){
+                $('#txtCantidad').focus()
+                toastMessage("warning",'La cantidad es obligatoria')
+                return false;
+            }
+
+
+            if (!$('#cmbCategories').val()) {
+                $('#cmbCategories').focus();
+                toastMessage("warning", 'La categoría es obligatoria');
+                return false;
+            }
+
+            if (!$('#cmbSupplier').val()) {
+                $('#cmbSupplier').focus();
+                toastMessage("warning", 'El proveedor es obligatorio');
+                return false;
+            }
+
+
+
+            return true;
+        }
+
+        //funcion para enviar los datos y agregarlos
+        function AddProduct(producto){
+            console.log("entro a enviar");
+            console.log(producto);
+                $.ajax({
+                url: '@Url.Action("AddProduct", "Product")', // cambia esta ruta por la real
+                method: 'POST',
+                //data son los parametros que vamos a enviar
+                //console.log("objecto a enviar");
+                //console.log(producto);
+                data:producto,
+                DataTable: 'json',
+                success: function(result){
+                    console.log(result);
+                    toastMessage('sucess', 'Registro creado exitosamente')
+                    clearFormProduct();
+                    getAllProduct();
+
+                },
+                error: function (error) {
+                    errorHttp(error);
+                    //console.error(error);
+                    //alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+                }
+            });
+
+        }
+
+        //funcion para mostrar la informacion del registro a editar
+        function editProduct(id){
+            isEdit = true;
+            //idCustomer = id;
+            //find se usa para filtrar
+            const producto = listProduct.find(x=> x.productId == id);
+            $('#txtProduct').val(producto.productName); //val() se usa para decirle que los capture
+            $('#txtPrecio').val(producto.unitPrice);
+            $('#txtCantidad').val(producto.unitsInStock);
+            $('#cmbCategories').val(producto.categoryId);
+            $('#cmbSupplier').val(producto.supplierId);
+
+
+             openModal(true)
+            
+            if ( isEdit== true){
+
+                idProduct = id;
+                console.log(idProduct);
+                console.log(id);
+                console.log(producto);
+
+            }
+            else{
+                console.log("no se pudo enviar el id")
+            }
+            
+            
+        }
+
+        //funcion para enviar la informacion actualizada
+         function confirmeditProduct(producto){
+             console.log(producto);
+             $.ajax({
+                url: '@Url.Action("UpdateProduct", "Product")', // cambia esta ruta por la real
+                method: 'PUT',
+                //data son los parametros que vamos a enviar
+                data:producto,
+                DataTable: 'json',
+                success: function(result){
+                    console.log(result);
+                    toastMessage('sucess', 'Registro Editado exitosamente')
+                    clearFormProduct();
+                    getAllProduct();
+
+                },
+                error: function (error) {
+                    errorHttp(error);
+                   // console.error(error);
+                    //alertError('Ha ocurrido un error, por favor vuelve a intentarlo');
+
+                }
+            });
+        }
+
+
+
+    </script>
+}
+
+}
+    
+
+

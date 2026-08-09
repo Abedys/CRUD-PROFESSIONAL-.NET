@@ -25,6 +25,15 @@ namespace APP_ADSI2026.Controllers
             return View(await _context.Categories.ToListAsync());
         }
 
+
+        [HttpGet("GetAllCategories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            return Ok(await _context.Categories.ToListAsync());
+        }
+
+
+
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
