@@ -5,9 +5,11 @@
     
 <!--Esto es un modal -->
 <div class="row">
-    <div class="col-md-8">
-        <h1>listado de  Productos</h1>
+    <div class="col-md-8 d-flex align-items-center gap-2">
+        <i class="bi bi-box-seam fs-3"></i>
+        <h1 class="mb-0 text-primary">Listado de Productos</h1>
     </div>
+
     <div class=" col-md-4  text-end">
         <button type="button" class="btn btn-primary" onclick="openModal(false)" > <!--con este onclick que es false, le dicimos que mientras no sea editar ejecute el modal normal -->
             <!--Esto es un icono -->
@@ -28,8 +30,8 @@
                     <th>Precio</th>
                     <th>Cantidad</th>
                     <th>Provedor</th>
-                    <th>Categoria</th>
-
+                    <th>Categorias</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -234,65 +236,191 @@
         }
 
         // Configuración del DataTable: función para mostrar la información
+        // Carga los datos recibidos en la tabla de productos
         function loadTable(data) {
+            // Selecciona la tabla #tbproduct y configura DataTables
             $('#tbproduct').DataTable({
+
+                // Datos que se mostrarán en la tabla
                 data: data,
-                // destruye la tabla anterior y la vuelve a cargar
+
+                // Permite reinicializar la tabla
                 destroy: true,
-                // permite que la tabla se adapte al tamaño de la pantalla
-                responsive: true, //esta linea hace que la tabla sea responsive y se adapta a todo tipo de pantallas
 
+                // Hace la tabla responsive
+                responsive: true,
+
+                // Cantidad de registros por página
+                pageLength: 10,
+
+                // Configuración de textos de DataTables
+                language: {
+
+                    // Texto del buscador
+                    search: "Buscar:",
+
+                    // Texto del selector de cantidad
+                    lengthMenu: "Mostrar _MENU_ productos",
+
+                    // Información de registros mostrados
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ productos",
+
+                    // Mensaje cuando no hay datos
+                    infoEmpty: "No hay productos disponibles",
+
+                    // Información cuando se filtran datos
+                    infoFiltered: "(filtrado de _MAX_ productos)",
+
+                    // Mensaje cuando la búsqueda no encuentra resultados
+                    zeroRecords: "No se encontraron productos",
+
+                    // Textos de los botones de paginación
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                },
+
+                // Define las columnas de la tabla
                 columns: [
-                    { data: 'productName' },
-                    { data: 'unitPrice' },
-                    { data: 'unitsInStock' },
-                    { data: 'supplier' },
-                    { data: 'category' },
+
+                    // Columna: nombre del producto
                     {
-                    // Columna de acciones:
-                    // Se genera una columna especial dentro de la tabla que añade botones de
-                    // "Editar" y "Eliminar" para cada cliente mostrado.
-                    // Estos botones se crean dinámicamente tomando el id del cliente de la fila actual,
-                    // de modo que cada registro tenga sus propias acciones asociadas.
-                    // Esto permite gestionar la información directamente desde la tabla sin necesidad
-                    // de escribir los botones manualmente en el HTML.
-                        data: null,
-                        render:function(data)
-                        {
-                            //Codigo para colocar los botones de editar y eliminar
-                            const id=data.productId;
+                        data: 'productName'
+                    },
+
+                    // Columna: precio
+                    {
+                        data: 'unitPrice',
+
+                        // Personaliza cómo se muestra el precio
+                        render: function (data) {
+
+                            // Convierte a número y aplica formato colombiano
+                            return `$${Number(data).toLocaleString('es-CO')}`;
+                        }
+                    },
+
+                    // Columna: cantidad disponible
+                    {
+                        data: 'unitsInStock',
+
+                        // Personaliza cómo se muestra el stock
+                        render: function (data) {
+
+                            // Devuelve el stock dentro de un span
                             return `
-                                <div class="d-flex justify-content-center align-items-center gap-2">
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-outline-primary"
-                                        onclick="editProduct('${id}')"
-                                        title="Editar producto">
-
-                                        <i class="bi bi-pencil"></i>
-
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-outline-danger"
-                                        onclick="deleteProduct('${id}')"
-                                        title="Eliminar producto">
-
-                                        <i class="bi bi-trash"></i>
-
-                                    </button>
-
-                                </div>
+                                <span class="fw-semibold">
+                                    ${data}
+                                </span>
                             `;
-                            
+                        }
+                    },
+
+                    // Columna: proveedor
+                    {
+                        data: 'supplier'
+                    },
+
+                                // Columna: categoría
+                    {
+                        data: 'category',
+
+                        // Asigna un color dependiendo de la categoría
+                        render: function (data) {
+
+                            //por defecto las categorias seran de color gris
+                            let color = 'bg-secondary';
+                            //asignamos las categoriass usando boostrap
+                            switch (data) {
+
+                                case 'Beverages':
+                                    color = 'bg-primary';
+                                    break;
+
+                                case 'Condiments':
+                                    color = 'bg-warning text-dark';
+                                    break;
+
+                                case 'Produce':
+                                    color = 'bg-success';
+                                    break;
+
+                                case 'Meat/Poultry':
+                                    color = 'bg-danger';
+                                    break;
+
+                                case 'Seafood':
+                                    color = 'bg-info text-dark';
+                                    break;
+
+                                case 'Dairy Products':
+                                    color = 'bg-secondary';
+                                    break;
+
+                                case 'Confections':
+                                    color = 'bg-dark';
+                                    break;
+
+                                case 'Grains/Cereals':
+                                    color = 'bg-success';
+                                    break;
+                            }
+
+                            // Muestra la categoría como una etiqueta de Bootstrap
+                            return `
+                                    <span class="badge rounded-pill ${color} d-inline-block text-center" style="width: 120px; height: 30px;">
+                                    ${data}
+                                </span>
+                            `;
+                        }
+                    },
+
+                             
+
+                    // Columna de botones de acciones
+                    {
+                        // No obtiene una propiedad específica
+                        data: null,
+
+                        // Trabaja con el objeto completo del producto
+                        render: function (data) {
+
+                            // Obtiene el ID del producto
+                            const id = data.productId;
+
+                            // Crea los botones de editar y eliminar
+                            return `
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+
+                                        
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            onclick="editProduct('${id}')"
+                                            title="Editar producto"> 
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+
+                                        
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteProduct('${id}')"
+                                            title="Eliminar producto">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+
+                                    </div>
+                            `;
                         }
                     }
                 ]
             });
         }
-
+        
         //Esta uncion se utiliza para decirle al navegador que vamos a eliminar un registro
         function deleteProduct(productId){
             alertDelete().then((result)=>{
